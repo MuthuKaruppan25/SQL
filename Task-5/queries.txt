@@ -1,0 +1,158 @@
+queries used and their results
+
+========================================================================================
+
+mysql> describe employees;
++-------------+---------------+------+-----+---------+----------------+
+| Field       | Type          | Null | Key | Default | Extra          |
++-------------+---------------+------+-----+---------+----------------+
+| EMPLOYEE_ID | int           | NO   | PRI | NULL    | auto_increment |
+| NAME        | varchar(100)  | NO   |     | NULL    |                |
+| SALARY      | decimal(10,2) | YES  |     | NULL    |                |
+| STATUS      | varchar(20)   | YES  |     | Active  |                |
+| DEPTID      | int           | YES  | MUL | NULL    |                |
+| email       | varchar(255)  | NO   | UNI | NULL    |                |
++-------------+---------------+------+-----+---------+----------------+
+6 rows in set (0.08 sec)
+
+========================================================================================
+
+mysql> select * from employees where salary < (select avg(salary) from employees);
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |      2 | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
+|           4 | Priya  | 42000.00 | Inactive |      2 | priya@example.com  |
+|           8 | Deepa  | 45000.00 | Active   |      6 | deepa@example.com  |
++-------------+--------+----------+----------+--------+--------------------+
+5 rows in set (0.07 sec)
+
+
+========================================================================================
+
+mysql> SELECT DISTINCT DEPTID
+    -> FROM employees
+    -> WHERE DEPTID IN (
+    ->     SELECT DEPTID
+    ->     FROM employees
+    ->     GROUP BY DEPTID
+    ->     HAVING AVG(SALARY) > 40000
+    -> );
+    +--------+
+| DEPTID |
++--------+
+|      3 |
+|      4 |
+|      5 |
+|      6 |
+|      7 |
+|      8 |
++--------+
+6 rows in set (0.01 sec)
+
+This is the example of un-correlated query, because the  subquery runs only once and  it will be faster.
+
+========================================================================================
+
+mysql> select name,salary,(select avg
+    -> (salary) from employees where deptid = e.deptid) as deptavgsalary from employees e;
++---------+----------+---------------+
+| name    | salary   | deptavgsalary |
++---------+----------+---------------+
+| Muthu   | 30000.00 |  38000.000000 |
+| Gotham  | 40000.00 |  38000.000000 |
+| Mano    | 40000.00 |  38000.000000 |
+| Priya   | 42000.00 |  38000.000000 |
+| Ravi    | 50000.00 |  50000.000000 |
+| Sneha   | 55000.00 |  55000.000000 |
+| Vikram  | 60000.00 |  60000.000000 |
+| Deepa   | 45000.00 |  45000.000000 |
+| Karthik | 52000.00 |  52000.000000 |
+| Meera   | 48000.00 |  48000.000000 |
++---------+----------+---------------+
+10 rows in set (0.05 sec)
+
+This  is the example of correlated query here the subquery runs once per every rows in the outer table ,it will be
+slower approach when used with larger tables.
+
+========================================================================================
+
+mysql> select * from employees where (deptid,salary) in (select deptid,max(salary) from employees group by deptid);
++-------------+---------+----------+----------+--------+---------------------+
+| EMPLOYEE_ID | NAME    | SALARY   | STATUS   | DEPTID | email               |
++-------------+---------+----------+----------+--------+---------------------+
+|           4 | Priya   | 42000.00 | Inactive |      2 | priya@example.com   |
+|           5 | Ravi    | 50000.00 | Active   |      3 | ravi@example.com    |
+|           6 | Sneha   | 55000.00 | Active   |      4 | sneha@example.com   |
+|           7 | Vikram  | 60000.00 | Inactive |      5 | vikram@example.com  |
+|           8 | Deepa   | 45000.00 | Active   |      6 | deepa@example.com   |
+|           9 | Karthik | 52000.00 | Inactive |      7 | karthik@example.com |
+|          10 | Meera   | 48000.00 | Active   |      8 | meera@example.com   |
++-------------+---------+----------+----------+--------+---------------------+
+7 rows in set (0.01 sec)
+
+Same example with un-correlated query
+
+
+========================================================================================
+
+mysql> select name,salary,(select avg
+    -> (salary) from employees where deptid = e.deptid) as deptavgsalary from employees e;
++---------+----------+---------------+
+| name    | salary   | deptavgsalary |
++---------+----------+---------------+
+| Muthu   | 30000.00 |  38000.000000 |
+| Gotham  | 40000.00 |  38000.000000 |
+| Mano    | 40000.00 |  38000.000000 |
+| Priya   | 42000.00 |  38000.000000 |
+| Ravi    | 50000.00 |  50000.000000 |
+| Sneha   | 55000.00 |  55000.000000 |
+| Vikram  | 60000.00 |  60000.000000 |
+| Deepa   | 45000.00 |  45000.000000 |
+| Karthik | 52000.00 |  52000.000000 |
+| Meera   | 48000.00 |  48000.000000 |
++---------+----------+---------------+
+10 rows in set (0.05 sec)
+
+example Using correlated query
+
+========================================================================================
+
+mysql> select name,salary,d.deptavgsalary from employees e1 join (select deptid,avg(salary) as deptavgsalary 
+from employees e2 group by deptid)d on e1.deptid=d.deptid;
++---------+----------+---------------+
+| name    | salary   | deptavgsalary |
++---------+----------+---------------+
+| Muthu   | 30000.00 |  38000.000000 |
+| Gotham  | 40000.00 |  38000.000000 |
+| Mano    | 40000.00 |  38000.000000 |
+| Priya   | 42000.00 |  38000.000000 |
+| Ravi    | 50000.00 |  50000.000000 |
+| Sneha   | 55000.00 |  55000.000000 |
+| Vikram  | 60000.00 |  60000.000000 |
+| Deepa   | 45000.00 |  45000.000000 |
+| Karthik | 52000.00 |  52000.000000 |
+| Meera   | 48000.00 |  48000.000000 |
++---------+----------+---------------+
+10 rows in set (0.00 sec)
+
+
+Same example using un-correlated query
+
+========================================================================================
+
+mysql> select max(salary
+    -> ) from employees where salary < (select max(salary) from employees);
++--------------+
+| max(salary
+) |
++--------------+
+|     55000.00 |
++--------------+
+1 row in set (0.00 sec)
+
+second most Maximum_salary
+
+========================================================================================
