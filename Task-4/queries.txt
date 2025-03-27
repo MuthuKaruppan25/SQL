@@ -1,0 +1,242 @@
+Queries used and their results
+
+========================================================================================
+
+
+mysql> create table customers(customer_id int primary key, name varchar(100), email varchar(100) not null unique);
+Query OK, 0 rows affected (0.09 sec)
+
+========================================================================================
+
+mysql> create table orders(order_id int primary key,customer_id int, orderDate Date,amount Decimal(10,2), foreign key (customer_id) references customers(customer_id));
+Query OK, 0 rows affected (0.04 sec)
+
+========================================================================================
+
+mysql> describe customers;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| customer_id | int          | NO   | PRI | NULL    |       |
+| name        | varchar(100) | YES  |     | NULL    |       |
+| email       | varchar(100) | NO   | UNI | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+3 rows in set (0.04 sec)
+
+========================================================================================
+
+mysql> describe orders;
++-------------+---------------+------+-----+---------+-------+
+| Field       | Type          | Null | Key | Default | Extra |
++-------------+---------------+------+-----+---------+-------+
+| order_id    | int           | NO   | PRI | NULL    |       |
+| customer_id | int           | YES  | MUL | NULL    |       |
+| orderDate   | date          | YES  |     | NULL    |       |
+| amount      | decimal(10,2) | YES  |     | NULL    |       |
++-------------+---------------+------+-----+---------+-------+
+4 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> insert into customers(customer_id,name,email) values (1,'Muthu','muthu@gmail.com'),(2,'Mano','mano@gmail.com'),(3,'Kalai','kalai@gmail.com'),(4,'Gowtham','gowtham@gmail.com');
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> select * from customers;
++-------------+---------+-------------------+
+| customer_id | name    | email             |
++-------------+---------+-------------------+
+|           1 | Muthu   | muthu@gmail.com   |
+|           2 | Mano    | mano@gmail.com    |
+|           3 | Kalai   | kalai@gmail.com   |
+|           4 | Gowtham | gowtham@gmail.com |
++-------------+---------+-------------------+
+4 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> insert into orders(order_id,customer_id,orderDate,amount) values (1,1,'2025-12-01',10000),(2,1,'2025-12-02',20000),(3,2,'2024-09-03',10000),(4,3,'2023-09-25',20000),(5,4,'2024-09-20',30000);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select
+    -> * from orders;
++----------+-------------+------------+----------+
+| order_id | customer_id | orderDate  | amount   |
++----------+-------------+------------+----------+
+|        1 |           1 | 2025-12-01 | 10000.00 |
+|        2 |           1 | 2025-12-02 | 20000.00 |
+|        3 |           2 | 2024-09-03 | 10000.00 |
+|        4 |           3 | 2023-09-25 | 20000.00 |
+|        5 |           4 | 2024-09-20 | 30000.00 |
++----------+-------------+------------+----------+
+5 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 inner join orders t2 on t1.customer_id = t2.customer_id;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
++---------+----------+------------+----------+
+5 rows in set (0.06 sec)
+
+inner join will returns the common values on the both tables
+
+========================================================================================
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 left join orders t2 on t1.customer_id = t2.customer_id;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
++---------+----------+------------+----------+
+5 rows in set (0.00 sec)
+
+mysql> insert into customers (customer_id,name,email) values (5,'mughil','mughil@gmail.com');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into customers (customer_id,name,email) values (5,'mughil','mughil@gmail.com');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 left join orders t2 on t1.customer_id = t2.customer_id;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
+| mughil  |     NULL | NULL       |     NULL |
++---------+----------+------------+----------+
+6 rows in set (0.01 sec)
+
+left join will return all rows from the left table and matched values from the right table
+
+========================================================================================
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 right join orders t2 on t1.customer_id = t2.customer_id;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
++---------+----------+------------+----------+
+5 rows in set (0.00 sec)
+
+right join will return all rows from the right table and matched values from the left table
+
+========================================================================================
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 cross join orders t2;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| mughil  |        1 | 2025-12-01 | 10000.00 |
+| Gowtham |        1 | 2025-12-01 | 10000.00 |
+| Kalai   |        1 | 2025-12-01 | 10000.00 |
+| Mano    |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| mughil  |        2 | 2025-12-02 | 20000.00 |
+| Gowtham |        2 | 2025-12-02 | 20000.00 |
+| Kalai   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        2 | 2025-12-02 | 20000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| mughil  |        3 | 2024-09-03 | 10000.00 |
+| Gowtham |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        3 | 2024-09-03 | 10000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Muthu   |        3 | 2024-09-03 | 10000.00 |
+| mughil  |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        4 | 2023-09-25 | 20000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Mano    |        4 | 2023-09-25 | 20000.00 |
+| Muthu   |        4 | 2023-09-25 | 20000.00 |
+| mughil  |        5 | 2024-09-20 | 30000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
+| Kalai   |        5 | 2024-09-20 | 30000.00 |
+| Mano    |        5 | 2024-09-20 | 30000.00 |
+| Muthu   |        5 | 2024-09-20 | 30000.00 |
++---------+----------+------------+----------+
+25 rows in set (0.01 sec)
+
+cross join will returns the cartesian product of values of both the table.
+
+========================================================================================
+
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 natural join orders t2;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
++---------+----------+------------+----------+
+5 rows in set (0.00 sec)
+
+mysql> select t1.name,t2.order_id,t2.orderDate,t2.amount from customers t1 natural left join orders t2;
++---------+----------+------------+----------+
+| name    | order_id | orderDate  | amount   |
++---------+----------+------------+----------+
+| Muthu   |        1 | 2025-12-01 | 10000.00 |
+| Muthu   |        2 | 2025-12-02 | 20000.00 |
+| Mano    |        3 | 2024-09-03 | 10000.00 |
+| Kalai   |        4 | 2023-09-25 | 20000.00 |
+| Gowtham |        5 | 2024-09-20 | 30000.00 |
+| mughil  |     NULL | NULL       |     NULL |
++---------+----------+------------+----------+
+6 rows in set (0.01 sec)
+
+By using natural join we can avoid specifying the condition
+
+========================================================================================
+
+mysql> select t1.name,t2.email from customers t1,customers t2 where t1.customer_id<>t2.customer_id;
++---------+-------------------+
+| name    | email             |
++---------+-------------------+
+| mughil  | gowtham@gmail.com |
+| Kalai   | gowtham@gmail.com |
+| Mano    | gowtham@gmail.com |
+| Muthu   | gowtham@gmail.com |
+| mughil  | kalai@gmail.com   |
+| Gowtham | kalai@gmail.com   |
+| Mano    | kalai@gmail.com   |
+| Muthu   | kalai@gmail.com   |
+| mughil  | mano@gmail.com    |
+| Gowtham | mano@gmail.com    |
+| Kalai   | mano@gmail.com    |
+| Muthu   | mano@gmail.com    |
+| Gowtham | mughil@gmail.com  |
+| Kalai   | mughil@gmail.com  |
+| Mano    | mughil@gmail.com  |
+| Muthu   | mughil@gmail.com  |
+| mughil  | muthu@gmail.com   |
+| Gowtham | muthu@gmail.com   |
+| Kalai   | muthu@gmail.com   |
+| Mano    | muthu@gmail.com   |
++---------+-------------------+
+20 rows in set (0.02 sec)
+
+Self join is used here
+
+here customers t1, customers t2 are different aliases of the same table, where t1.customer_id<>t2.customer_id this
+condition ensures that every customer pairs with other customers.
+
+
