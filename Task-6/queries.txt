@@ -1,0 +1,206 @@
+Queries used and their results
+
+========================================================================================
+
+mysql> select * from customers;
++-------------+---------+-------------------+
+| customer_id | name    | email             |
++-------------+---------+-------------------+
+|           1 | Muthu   | muthu@gmail.com   |
+|           2 | Mano    | mano@gmail.com    |
+|           3 | Kalai   | kalai@gmail.com   |
+|           4 | Gowtham | gowtham@gmail.com |
+|           5 | mughil  | mughil@gmail.com  |
++-------------+---------+-------------------+
+5 rows in set (0.05 sec)
+
+========================================================================================
+
+mysql> select * from orders;
++----------+-------------+------------+----------+
+| order_id | customer_id | orderDate  | amount   |
++----------+-------------+------------+----------+
+|        1 |           1 | 2025-12-01 | 10000.00 |
+|        2 |           1 | 2025-12-02 | 20000.00 |
+|        3 |           2 | 2024-09-03 | 10000.00 |
+|        4 |           3 | 2023-09-25 | 20000.00 |
+|        5 |           4 | 2024-09-20 | 30000.00 |
++----------+-------------+------------+----------+
+5 rows in set (0.01 sec)
+
+mysql> truncate orders;
+Query OK, 0 rows affected (0.08 sec)
+
+========================================================================================
+
+mysql> alter table orders modify orderDate datetime;
+Query OK, 0 rows affected (0.12 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> describe orders;
++-------------+---------------+------+-----+---------+-------+
+| Field       | Type          | Null | Key | Default | Extra |
++-------------+---------------+------+-----+---------+-------+
+| order_id    | int           | NO   | PRI | NULL    |       |
+| customer_id | int           | YES  | MUL | NULL    |       |
+| orderDate   | datetime      | YES  |     | NULL    |       |
+| amount      | decimal(10,2) | YES  |     | NULL    |       |
++-------------+---------------+------+-----+---------+-------+
+4 rows in set (0.03 sec)
+
+========================================================================================
+
+mysql> insert into orders(order_id,customer_id,orderDate,amount) values (1,1,current_timestamp,10000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from orders;
++----------+-------------+---------------------+----------+
+| order_id | customer_id | orderDate           | amount   |
++----------+-------------+---------------------+----------+
+|        1 |           1 | 2025-03-27 19:10:14 | 10000.00 |
++----------+-------------+---------------------+----------+
+1 row in set (0.00 sec)
+
+========================================================================================
+
+mysql> insert into orders(order_id,customer_id,orderDate,amount) values (2,1,Date_sub(current_timestamp,interval 10 day),10000);
+Query OK, 1 row affected (0.01 sec)
+
+========================================================================================
+
+mysql> INSERT INTO orders(order_id, customer_id, orderDate, amount)  VALUES (3, 2, DATE_SUB(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY), INTERVAL 10 HOUR), 10000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from orders;
++----------+-------------+---------------------+----------+
+| order_id | customer_id | orderDate           | amount   |
++----------+-------------+---------------------+----------+
+|        1 |           1 | 2025-03-27 19:10:14 | 10000.00 |
+|        2 |           1 | 2025-03-17 19:12:39 | 10000.00 |
+|        3 |           2 | 2025-03-17 09:13:34 | 10000.00 |
++----------+-------------+---------------------+----------+
+3 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> insert into orders(order_id,customer_id,orderDate,amount) values (4,3,Date_sub(current_timestamp,interval 5 day),10000);
+Query OK, 1 row affected (0.00 sec)
+
+========================================================================================
+
+mysql> insert into orders(order_id,customer_id,orderDate,amount) values (5,3,Date_add(current_timestamp,interval 5 day),10000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from orders;
++----------+-------------+---------------------+----------+
+| order_id | customer_id | orderDate           | amount   |
++----------+-------------+---------------------+----------+
+|        1 |           1 | 2025-03-27 19:10:14 | 10000.00 |
+|        2 |           1 | 2025-03-17 19:12:39 | 10000.00 |
+|        3 |           2 | 2025-03-17 09:13:34 | 10000.00 |
+|        4 |           3 | 2025-03-22 19:14:34 | 10000.00 |
+|        5 |           3 | 2025-04-01 19:15:18 | 10000.00 |
++----------+-------------+---------------------+----------+
+5 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,t2.orderDate,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where DATEDIFF(curdate(),Date(orderDate))<30)as t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+---------------------+----------+
+| name  | email           | orderDate           | amount   |
++-------+-----------------+---------------------+----------+
+| Muthu | muthu@gmail.com | 2025-03-27 19:10:14 | 10000.00 |
+| Muthu | muthu@gmail.com | 2025-03-17 19:12:39 | 10000.00 |
+| Mano  | mano@gmail.com  | 2025-03-17 09:13:34 | 10000.00 |
+| Kalai | kalai@gmail.com | 2025-03-22 19:14:34 | 10000.00 |
+| Kalai | kalai@gmail.com | 2025-04-01 19:15:18 | 10000.00 |
++-------+-----------------+---------------------+----------+
+5 rows in set (0.02 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,t2.orderDate,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where month(orderDate) = month(curdate()) and year(orderDate) = year(curdate()))as t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+---------------------+----------+
+| name  | email           | orderDate           | amount   |
++-------+-----------------+---------------------+----------+
+| Muthu | muthu@gmail.com | 2025-03-27 19:10:14 | 10000.00 |
+| Muthu | muthu@gmail.com | 2025-03-17 19:12:39 | 10000.00 |
+| Mano  | mano@gmail.com  | 2025-03-17 09:13:34 | 10000.00 |
+| Kalai | kalai@gmail.com | 2025-03-22 19:14:34 | 10000.00 |
++-------+-----------------+---------------------+----------+
+4 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,day(t2.orderDate) as orderedDay,month(t2.orderDate) as orderedMonth,year(t2.orderDate) as orderedYear,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where month(orderDate) = month(curdate()) and year(orderDate) = year(curdate()))as t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+------------+--------------+-------------+----------+
+| name  | email           | orderedDay | orderedMonth | orderedYear | amount   |
++-------+-----------------+------------+--------------+-------------+----------+
+| Muthu | muthu@gmail.com |         27 |            3 |        2025 | 10000.00 |
+| Muthu | muthu@gmail.com |         17 |            3 |        2025 | 10000.00 |
+| Mano  | mano@gmail.com  |         17 |            3 |        2025 | 10000.00 |
+| Kalai | kalai@gmail.com |         22 |            3 |        2025 | 10000.00 |
++-------+-----------------+------------+--------------+-------------+----------+
+4 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,day(t2.orderDate) as orderedDay,dayname(t2.orderDate) as orderedDayName,month(t2.orderDate) as orderedMonth,monthname(t2.orderDate) as orderedMonthName,year(t2.orderDate) as orderedYear,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where month(orderDate) = month(curdate()) and year(orderDate) = year(curdate()))as t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+------------+----------------+--------------+------------------+-------------+----------+
+| name  | email           | orderedDay | orderedDayName | orderedMonth | orderedMonthName | orderedYear | amount   |
++-------+-----------------+------------+----------------+--------------+------------------+-------------+----------+
+| Muthu | muthu@gmail.com |         27 | Thursday       |            3 | March            |        2025 | 10000.00 |
+| Muthu | muthu@gmail.com |         17 | Monday         |            3 | March            |        2025 | 10000.00 |
+| Mano  | mano@gmail.com  |         17 | Monday         |            3 | March            |        2025 | 10000.00 |
+| Kalai | kalai@gmail.com |         22 | Saturday       |            3 | March            |        2025 | 10000.00 |
++-------+-----------------+------------+----------------+--------------+------------------+-------------+----------+
+4 rows in set (0.01 sec)
+
+
+========================================================================================
+
+mysql> select t1.name,t1.email,t2.orderDate,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where orderDate >= Date_sub(current_timestamp,interval 30 day)) t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+---------------------+----------+
+| name  | email           | orderDate           | amount   |
++-------+-----------------+---------------------+----------+
+| Muthu | muthu@gmail.com | 2025-03-27 19:10:14 | 10000.00 |
+| Muthu | muthu@gmail.com | 2025-03-17 19:12:39 | 10000.00 |
+| Mano  | mano@gmail.com  | 2025-03-17 09:13:34 | 10000.00 |
+| Kalai | kalai@gmail.com | 2025-03-22 19:14:34 | 10000.00 |
+| Kalai | kalai@gmail.com | 2025-04-01 19:15:18 | 10000.00 |
++-------+-----------------+---------------------+----------+
+5 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,DATE_FORMAT(t2.orderDate, '%d/%m/%Y') as changed_dateFormat,t2.amount from customers t1 join (select customer_id,orderDate,amou+-------+-----------------+--------------------+----------+p,interval 30 day)) t2 on t1.customer_id = t2.customer_id;
+| name  | email           | changed_dateFormat | amount   |
++-------+-----------------+--------------------+----------+
+| Muthu | muthu@gmail.com | 27/03/2025         | 10000.00 |
+| Muthu | muthu@gmail.com | 17/03/2025         | 10000.00 |
+| Mano  | mano@gmail.com  | 17/03/2025         | 10000.00 |
+| Kalai | kalai@gmail.com | 22/03/2025         | 10000.00 |
+| Kalai | kalai@gmail.com | 01/04/2025         | 10000.00 |
++-------+-----------------+--------------------+----------+
+5 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,DATE_FORMAT(t2.orderDate, '%d/%m/%Y') as changed_dateFormat,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where hour(timediff(current_timestamp,orderDate)) < 1) t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+--------------------+----------+
+| name  | email           | changed_dateFormat | amount   |
++-------+-----------------+--------------------+----------+
+| Muthu | muthu@gmail.com | 27/03/2025         | 10000.00 |
++-------+-----------------+--------------------+----------+
+1 row in set (0.01 sec)
+
+========================================================================================
+
+mysql> select t1.name,t1.email,DATE_FORMAT(t2.orderDate, '%d/%m/%Y %h:%m:%s') as changed_dateFormat,t2.amount from customers t1 join (select customer_id,orderDate,amount from orders where hour(timediff(current_timestamp,orderDate)) < 1) t2 on t1.customer_id = t2.customer_id;
++-------+-----------------+---------------------+----------+
+| name  | email           | changed_dateFormat  | amount   |
++-------+-----------------+---------------------+----------+
+| Muthu | muthu@gmail.com | 27/03/2025 07:03:14 | 10000.00 |
++-------+-----------------+---------------------+----------+
+1 row in set (0.00 sec)
+
