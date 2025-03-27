@@ -1,0 +1,163 @@
+Queries Used and their Output
+
+========================================================================================
+mysql> create database Task;
+Query OK, 1 row affected (0.06 sec)
+========================================================================================
+
+mysql> use Task;
+Database changed
+
+========================================================================================
+
+mysql> CREATE TABLE EMPLOYEES (
+    ->     EMPLOYEE_ID INT AUTO_INCREMENT PRIMARY KEY,
+    ->     NAME VARCHAR(100) NOT NULL,
+    ->     SALARY DECIMAL(10,2) CHECK (SALARY >= 10000),
+    ->     STATUS VARCHAR(20) DEFAULT 'Active',
+    ->     DEPTID INT
+    -> );
+
+Query OK, 0 rows affected (0.09 sec)
+
+========================================================================================
+
+mysql> Alter table employees add email varchar(100) unique;
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+========================================================================================
+
+mysql> describe employees;
++-------------+---------------+------+-----+---------+----------------+
+| Field       | Type          | Null | Key | Default | Extra          |
++-------------+---------------+------+-----+---------+----------------+
+| EMPLOYEE_ID | int           | NO   | PRI | NULL    | auto_increment |
+| NAME        | varchar(100)  | NO   |     | NULL    |                |
+| SALARY      | decimal(10,2) | YES  |     | NULL    |                |
+| STATUS      | varchar(20)   | YES  |     | Active  |                |
+| DEPTID      | int           | YES  |     | NULL    |                |
+| email       | varchar(100)  | YES  | UNI | NULL    |                |
++-------------+---------------+------+-----+---------+----------------+
+6 rows in set (0.03 sec)
+
+========================================================================================
+
+mysql> ALTER TABLE employees MODIFY COLUMN email VARCHAR(255) NOT NULL;
+Query OK, 0 rows affected (0.09 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+========================================================================================
+
+mysql> CREATE TABLE DEPT(DEPTID INT PRIMARY KEY, DEPT_NAME VARCHAR(100) NOT NULL);
+Query OK, 0 rows affected (0.08 sec)
+
+========================================================================================
+
+mysql> ALTER TABLE employees
+    -> ADD CONSTRAINT fk_dept
+    -> FOREIGN KEY (DEPTID)
+    -> REFERENCES DEPT(DEPTID)
+    -> ON DELETE SET NULL ON UPDATE CASCADE;
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+========================================================================================
+mysql> INSERT INTO DEPT (DEPTID, DEPT_NAME)
+    -> VALUES
+    -> (1, 'Marketing'),
+    -> (2, 'Sales');
+Query OK, 2 rows affected (0.06 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+
+========================================================================================
+
+
+mysql> select * from dept;
++--------+-----------+
+| DEPTID | DEPT_NAME |
++--------+-----------+
+|      1 | Marketing |
+|      2 | Sales     |
++--------+-----------+
+2 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> INSERT INTO employees (NAME, SALARY, STATUS, DEPTID, email)
+    -> VALUES
+    -> ('Muthu', 30000, 'Active', 1, 'muthu@example.com'),
+    -> ('Gotham', 40000, 'Inactive', 2, 'gotham@example.com');
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+========================================================================================
+
+mysql> select * from employees;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |      1 | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
++-------------+--------+----------+----------+--------+--------------------+
+2 rows in set (0.01 sec)
+
+mysql> INSERT INTO employees (NAME, SALARY, STATUS, DEPTID, email) values
+    -> ('Mano',40000,'Active',1,'mano@gmail.com');
+Query OK, 1 row affected (0.01 sec)
+
+========================================================================================
+
+mysql> select * from employees where status='Active';
++-------------+-------+----------+--------+--------+-------------------+
+| EMPLOYEE_ID | NAME  | SALARY   | STATUS | DEPTID | email             |
++-------------+-------+----------+--------+--------+-------------------+
+|           1 | Muthu | 30000.00 | Active |      1 | muthu@example.com |
+|           3 | Mano  | 40000.00 | Active |      1 | mano@gmail.com    |
++-------------+-------+----------+--------+--------+-------------------+
+2 rows in set (0.01 sec)
+
+mysql> select * from employees where status='Active' order by salary desc;
++-------------+-------+----------+--------+--------+-------------------+
+| EMPLOYEE_ID | NAME  | SALARY   | STATUS | DEPTID | email             |
++-------------+-------+----------+--------+--------+-------------------+
+|           3 | Mano  | 40000.00 | Active |      1 | mano@gmail.com    |
+|           1 | Muthu | 30000.00 | Active |      1 | muthu@example.com |
++-------------+-------+----------+--------+--------+-------------------+
+2 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> DELETE FROM dept WHERE deptid = 1;
+Query OK, 1 row affected (0.05 sec)
+
+
+========================================================================================
+
+mysql> select * from employees;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |   NULL | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |   NULL | mano@gmail.com     |
++-------------+--------+----------+----------+--------+--------------------+
+3 rows in set (0.00 sec)
+
+========================================================================================
+
+
+mysql> update employees set deptid = 2 where deptid is null;
+Query OK, 2 rows affected (0.01 sec)
+Rows matched: 2  Changed: 2  Warnings: 0
+
+mysql> select * from employees;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |      2 | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
++-------------+--------+----------+----------+--------+--------------------+
+3 rows in set (0.00 sec)
