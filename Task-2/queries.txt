@@ -1,0 +1,183 @@
+Queries Used and their Result
+
+========================================================================================
+
+mysql> INSERT INTO DEPT (DEPTID, DEPT_NAME)
+    -> VALUES
+    -> (3, 'Human Resources'),
+    -> (4, 'Finance'),
+    -> (5, 'IT'),
+    -> (6, 'Operations'),
+    -> (7, 'Customer Support'),
+    -> (8, 'Research & Development');
+Query OK, 6 rows affected (0.05 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+========================================================================================
+
+mysql> INSERT INTO employees (NAME, SALARY, STATUS, DEPTID, email)
+    -> VALUES  ('Priya', 42000, 'Inactive', 2, 'priya@example.com'),
+    -> ('Ravi', 50000, 'Active', 3, 'ravi@example.com'),
+    -> ('Sneha', 55000, 'Active', 4, 'sneha@example.com'),
+    -> ('Vikram', 60000, 'Inactive', 5, 'vikram@example.com'),
+    -> ('Deepa', 45000, 'Active', 6, 'deepa@example.com'),
+    -> ('Karthik', 52000, 'Inactive', 7, 'karthik@example.com'),
+    -> ('Meera', 48000, 'Active', 8, 'meera@example.com');
+Query OK, 7 rows affected (0.01 sec)
+Records: 7  Duplicates: 0  Warnings: 0
+
+========================================================================================
+
+mysql> select * from employees;
++-------------+---------+----------+----------+--------+---------------------+
+| EMPLOYEE_ID | NAME    | SALARY   | STATUS   | DEPTID | email               |
++-------------+---------+----------+----------+--------+---------------------+
+|           1 | Muthu   | 30000.00 | Active   |      2 | muthu@example.com   |
+|           2 | Gotham  | 40000.00 | Inactive |      2 | gotham@example.com  |
+|           3 | Mano    | 40000.00 | Active   |      2 | mano@gmail.com      |
+|           4 | Priya   | 42000.00 | Inactive |      2 | priya@example.com   |
+|           5 | Ravi    | 50000.00 | Active   |      3 | ravi@example.com    |
+|           6 | Sneha   | 55000.00 | Active   |      4 | sneha@example.com   |
+|           7 | Vikram  | 60000.00 | Inactive |      5 | vikram@example.com  |
+|           8 | Deepa   | 45000.00 | Active   |      6 | deepa@example.com   |
+|           9 | Karthik | 52000.00 | Inactive |      7 | karthik@example.com |
+|          10 | Meera   | 48000.00 | Active   |      8 | meera@example.com   |
++-------------+---------+----------+----------+--------+---------------------+
+10 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> select * from employees where deptid=2;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |      2 | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
+|           4 | Priya  | 42000.00 | Inactive |      2 | priya@example.com  |
++-------------+--------+----------+----------+--------+--------------------+
+4 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> select * from employees where deptid=2 order by salary desc;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           4 | Priya  | 42000.00 | Inactive |      2 | priya@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
+|           1 | Muthu  | 30000.00 | Active   |      2 | muthu@example.com  |
++-------------+--------+----------+----------+--------+--------------------+
+4 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select * from employees order by deptid, salary desc;
++-------------+---------+----------+----------+--------+---------------------+
+| EMPLOYEE_ID | NAME    | SALARY   | STATUS   | DEPTID | email               |
++-------------+---------+----------+----------+--------+---------------------+
+|           4 | Priya   | 42000.00 | Inactive |      2 | priya@example.com   |
+|           2 | Gotham  | 40000.00 | Inactive |      2 | gotham@example.com  |
+|           3 | Mano    | 40000.00 | Active   |      2 | mano@gmail.com      |
+|           1 | Muthu   | 30000.00 | Active   |      2 | muthu@example.com   |
+|           5 | Ravi    | 50000.00 | Active   |      3 | ravi@example.com    |
+|           6 | Sneha   | 55000.00 | Active   |      4 | sneha@example.com   |
+|           7 | Vikram  | 60000.00 | Inactive |      5 | vikram@example.com  |
+|           8 | Deepa   | 45000.00 | Active   |      6 | deepa@example.com   |
+|           9 | Karthik | 52000.00 | Inactive |      7 | karthik@example.com |
+|          10 | Meera   | 48000.00 | Active   |      8 | meera@example.com   |
++-------------+---------+----------+----------+--------+---------------------+
+10 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select * from employees where deptid=2 and salary>=40000;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
+|           4 | Priya  | 42000.00 | Inactive |      2 | priya@example.com  |
++-------------+--------+----------+----------+--------+--------------------+
+3 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select * from employees where deptid=2 or salary>=40000;
++-------------+---------+----------+----------+--------+---------------------+
+| EMPLOYEE_ID | NAME    | SALARY   | STATUS   | DEPTID | email               |
++-------------+---------+----------+----------+--------+---------------------+
+|           1 | Muthu   | 30000.00 | Active   |      2 | muthu@example.com   |
+|           2 | Gotham  | 40000.00 | Inactive |      2 | gotham@example.com  |
+|           3 | Mano    | 40000.00 | Active   |      2 | mano@gmail.com      |
+|           4 | Priya   | 42000.00 | Inactive |      2 | priya@example.com   |
+|           5 | Ravi    | 50000.00 | Active   |      3 | ravi@example.com    |
+|           6 | Sneha   | 55000.00 | Active   |      4 | sneha@example.com   |
+|           7 | Vikram  | 60000.00 | Inactive |      5 | vikram@example.com  |
+|           8 | Deepa   | 45000.00 | Active   |      6 | deepa@example.com   |
+|           9 | Karthik | 52000.00 | Inactive |      7 | karthik@example.com |
+|          10 | Meera   | 48000.00 | Active   |      8 | meera@example.com   |
++-------------+---------+----------+----------+--------+---------------------+
+10 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select * from employees where deptid in (2,4,5);
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |      2 | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
+|           4 | Priya  | 42000.00 | Inactive |      2 | priya@example.com  |
+|           6 | Sneha  | 55000.00 | Active   |      4 | sneha@example.com  |
+|           7 | Vikram | 60000.00 | Inactive |      5 | vikram@example.com |
++-------------+--------+----------+----------+--------+--------------------+
+6 rows in set (0.00 sec)
+
+
+========================================================================================
+
+mysql> select * from employees where name like 'M%';
++-------------+-------+----------+--------+--------+-------------------+
+| EMPLOYEE_ID | NAME  | SALARY   | STATUS | DEPTID | email             |
++-------------+-------+----------+--------+--------+-------------------+
+|           1 | Muthu | 30000.00 | Active |      2 | muthu@example.com |
+|           3 | Mano  | 40000.00 | Active |      2 | mano@gmail.com    |
+|          10 | Meera | 48000.00 | Active |      8 | meera@example.com |
++-------------+-------+----------+--------+--------+-------------------+
+3 rows in set (0.01 sec)
+
+========================================================================================
+
+mysql> select * from employees where salary between 30000 and 40000;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           1 | Muthu  | 30000.00 | Active   |      2 | muthu@example.com  |
+|           2 | Gotham | 40000.00 | Inactive |      2 | gotham@example.com |
+|           3 | Mano   | 40000.00 | Active   |      2 | mano@gmail.com     |
++-------------+--------+----------+----------+--------+--------------------+
+3 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql> select * from employees where name like '_u%u';
++-------------+-------+----------+--------+--------+-------------------+
+| EMPLOYEE_ID | NAME  | SALARY   | STATUS | DEPTID | email             |
++-------------+-------+----------+--------+--------+-------------------+
+|           1 | Muthu | 30000.00 | Active |      2 | muthu@example.com |
++-------------+-------+----------+--------+--------+-------------------+
+1 row in set (0.00 sec)
+
+========================================================================================
+
+mysql> select * from employees order by salary desc limit 2;
++-------------+--------+----------+----------+--------+--------------------+
+| EMPLOYEE_ID | NAME   | SALARY   | STATUS   | DEPTID | email              |
++-------------+--------+----------+----------+--------+--------------------+
+|           7 | Vikram | 60000.00 | Inactive |      5 | vikram@example.com |
+|           6 | Sneha  | 55000.00 | Active   |      4 | sneha@example.com  |
++-------------+--------+----------+----------+--------+--------------------+
+2 rows in set (0.06 sec)
