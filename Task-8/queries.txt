@@ -1,0 +1,132 @@
+Queries used and their results
+
+using ctes we can create a temporary result set within the single query, by using this we can simplified version of
+complex query.
+
+we can also use recursive ctes when you want to execute hierarchial queries
+
+with non Recursive cte we can simplify queries like we can make it select a needed attributes (for eg avg(salary))
+and we can use it with outer query.
+
+========================================================================================
+
+mysql> describe employees;
++-------------+---------------+------+-----+---------+----------------+
+| Field       | Type          | Null | Key | Default | Extra          |
++-------------+---------------+------+-----+---------+----------------+
+| EMPLOYEE_ID | int           | NO   | PRI | NULL    | auto_increment |
+| NAME        | varchar(100)  | NO   |     | NULL    |                |
+| SALARY      | decimal(10,2) | YES  |     | NULL    |                |
+| STATUS      | varchar(20)   | YES  |     | Active  |                |
+| DEPTID      | int           | YES  | MUL | NULL    |                |
+| email       | varchar(255)  | NO   | UNI | NULL    |                |
++-------------+---------------+------+-----+---------+----------------+
+6 rows in set (0.07 sec)
+
+========================================================================================
+
+mysql> with emp_with_good_sal as (
+    ->     select deptid,avg(salary) as avg_sal from employees group by deptid
+    -> )
+    -> select e.name,e.salary, h.avg_sal from employees e join emp_with_good_sal h on e.deptid = h.deptid where e.salary > h.avg_sal;
++--------+----------+--------------+
+| name   | salary   | avg_sal      |
++--------+----------+--------------+
+| Gotham | 40000.00 | 37500.000000 |
+| Mano   | 40000.00 | 37500.000000 |
+| Priya  | 42000.00 | 37500.000000 |
+| Suresh | 41000.00 | 37500.000000 |
+| Neha   | 52000.00 | 51666.666667 |
+| Anjali | 53000.00 | 51666.666667 |
+| Divya  | 62000.00 | 60000.000000 |
+| Ajay   | 47000.00 | 46000.000000 |
+| Sanjay | 53000.00 | 52000.000000 |
+| Pooja  | 50000.00 | 49000.000000 |
++--------+----------+--------------+
+10 rows in set (0.03 sec)
+
+========================================================================================
+
+mysql> create table employeedetails(emp_id int primary key,name varchar(200),email varchar(200),manager_id int, foreign key (manager_id) references employeedetails(emp_id));
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> INSERT INTO employeedetails (emp_id, name, email, manager_id) VALUES
+    -> (1, 'Rajesh Kumar', 'rajesh.kumar@example.com', NULL),   -- CEO (No Manager)
+    -> (2, 'Priya Sharma', 'priya.sharma@example.com', 1),      -- Reports to CEO
+    -> (3, 'Vikram Singh', 'vikram.singh@example.com', 1),      -- Reports to CEO
+    -> (4, 'Aditi Verma', 'aditi.verma@example.com', 2),        -- Reports to Priya
+    -> (5, 'Karthik Rao', 'karthik.rao@example.com', 2),        -- Reports to Priya
+    -> (6, 'Sneha Das', 'sneha.das@example.com', 3),           -- Reports to Vikram
+    -> (7, 'Manoj Iyer', 'manoj.iyer@example.com', 3),         -- Reports to Vikram
+    -> (8, 'Deepa Nair', 'deepa.nair@example.com', 4),        -- Reports to Aditi
+    -> (9, 'Ravi Patel', 'ravi.patel@example.com', 5),        -- Reports to Karthik
+    -> (10, 'Ananya Sen', 'ananya.sen@example.com', 6);       -- Reports to Sneha
+Query OK, 10 rows affected (0.03 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+========================================================================================
+
+mysql> select * from employeedetails;
++--------+--------------+--------------------------+------------+
+| emp_id | name         | email                    | manager_id |
++--------+--------------+--------------------------+------------+
+|      1 | Rajesh Kumar | rajesh.kumar@example.com |       NULL |
+|      2 | Priya Sharma | priya.sharma@example.com |          1 |
+|      3 | Vikram Singh | vikram.singh@example.com |          1 |
+|      4 | Aditi Verma  | aditi.verma@example.com  |          2 |
+|      5 | Karthik Rao  | karthik.rao@example.com  |          2 |
+|      6 | Sneha Das    | sneha.das@example.com    |          3 |
+|      7 | Manoj Iyer   | manoj.iyer@example.com   |          3 |
+|      8 | Deepa Nair   | deepa.nair@example.com   |          4 |
+|      9 | Ravi Patel   | ravi.patel@example.com   |          5 |
+|     10 | Ananya Sen   | ananya.sen@example.com   |          6 |
++--------+--------------+--------------------------+------------+
+10 rows in set (0.00 sec)
+
+========================================================================================
+
+mysql>  with recursive emp_hierarchy as(
+    ->     select emp_id,name,manager_id,1 as level from employeedetails where manager_id is null
+    ->     union all
+    ->     select e.emp_id,e.name,e.manager_id, h.level+1 from employeedetails e join emp_hierarchy h
+    ->     on e.manager_id = h.emp_id
+    -> )
+    -> select * from emp_hierarchy;
++--------+--------------+------------+-------+
+| emp_id | name         | manager_id | level |
++--------+--------------+------------+-------+
+|      1 | Rajesh Kumar |       NULL |     1 |
+|      2 | Priya Sharma |          1 |     2 |
+|      3 | Vikram Singh |          1 |     2 |
+|      4 | Aditi Verma  |          2 |     3 |
+|      5 | Karthik Rao  |          2 |     3 |
+|      6 | Sneha Das    |          3 |     3 |
+|      7 | Manoj Iyer   |          3 |     3 |
+|      8 | Deepa Nair   |          4 |     4 |
+|      9 | Ravi Patel   |          5 |     4 |
+|     10 | Ananya Sen   |          6 |     4 |
++--------+--------------+------------+-------+
+10 rows in set (0.06 sec)
+
+========================================================================================
+
+mysql> with recursive emp_hierarchy as(
+    ->     select emp_id,name,manager_id,1 as level from employeedetails where manager_id is null
+    ->     union all
+    ->     select e.emp_id,e.name,e.manager_id, h.level+1 from employeedetails e join emp_hierarchy h
+    ->     on e.manager_id = h.emp_id
+    ->     where h.level<3
+    -> )
+    -> select * from emp_hierarchy;
++--------+--------------+------------+-------+
+| emp_id | name         | manager_id | level |
++--------+--------------+------------+-------+
+|      1 | Rajesh Kumar |       NULL |     1 |
+|      2 | Priya Sharma |          1 |     2 |
+|      3 | Vikram Singh |          1 |     2 |
+|      4 | Aditi Verma  |          2 |     3 |
+|      5 | Karthik Rao  |          2 |     3 |
+|      6 | Sneha Das    |          3 |     3 |
+|      7 | Manoj Iyer   |          3 |     3 |
++--------+--------------+------------+-------+
+7 rows in set (0.01 sec)
