@@ -1,0 +1,187 @@
+Queries used and their results
+
+stored procedure stores the set of pre-compiled sql statemens that performs tasks in the database.
+it can be executed multiple times with different values by calling them.
+
+user-defined-function is a reusable function in sql that returns a value or a table based on input parameters
+
+========================================================================================
+
+mysql> create database salesDB;
+Query OK, 1 row affected (0.08 sec)
+
+mysql> use salesDB
+Database changed
+mysql> CREATE TABLE sales (id INT AUTO_INCREMENT PRIMARY KEY,product_name VARCHAR(100),sale_date DATE,amount DECIMAL(10,2));
+Query OK, 0 rows affected (0.07 sec)
+
+========================================================================================
+
+mysql> INSERT INTO sales (product_name, sale_date, amount) VALUES
+    -> ('Laptop', '2024-03-10', 1200.00),
+    -> ('Phone', '2024-03-12', 800.00),
+    -> ('Tablet', '2024-03-15', 500.00),
+    -> ('Laptop', '2024-03-20', 1300.00),
+    -> ('Phone', '2024-03-22', 750.00);
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select * from sales;
++----+--------------+------------+---------+
+| id | product_name | sale_date  | amount  |
++----+--------------+------------+---------+
+|  1 | Laptop       | 2024-03-10 | 1200.00 |
+|  2 | Phone        | 2024-03-12 |  800.00 |
+|  3 | Tablet       | 2024-03-15 |  500.00 |
+|  4 | Laptop       | 2024-03-20 | 1300.00 |
+|  5 | Phone        | 2024-03-22 |  750.00 |
++----+--------------+------------+---------+
+5 rows in set (0.00 sec)
+
+========================================================================================
+
+stored procedure to calculate the total sales between Dates 
+
+mysql> create procedure totalsales(in start_date date,in end_date date)
+    -> begin
+    ->     select sum(amount) as total_sales from sales where sale_date between start_date and end_date;
+    -> end //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql>
+mysql> delimiter ;
+
+mysql> call totalsales('2024-03-10', '2024-03-20');
++-------------+
+| total_sales |
++-------------+
+|     3800.00 |
++-------------+
+1 row in set (0.01 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+
+========================================================================================
+
+functions in mysql needs the characteristics to be defined
+
+deterministic - returns same set of results for same values
+
+not-deterministic - returns different set of values for same values (eg: CURRENT_TIMESTAMP())
+
+reads sql - allows to read table data but not to modify IT
+
+no sql - doesnt allows to read table data
+
+mysql> create function calculateDiscount(amount DECIMAL(10,2)) returns DECIMAL(10,2) deterministic
+    -> begin
+    ->     declare discount DECIMAL(10,2);
+    ->     if amount > 1000 then
+    ->         set discount = amount * 0.10;
+    ->     else
+    ->         set discount = 0;
+    ->     end if;
+    ->     return discount;
+    -> end //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter ;
+
+
+========================================================================================
+
+mysql> SELECT calculateDiscount(1200) AS discount;
++----------+
+| discount |
++----------+
+|   120.00 |
++----------+
+1 row in set (0.01 sec)
+
+mysql> SELECT calculateDiscount(200) AS discount;
++----------+
+| discount |
++----------+
+|     0.00 |
++----------+
+1 row in set (0.00 sec)
+
+
+========================================================================================
+
+mysql> create function gettotalsalesbyproduct(product_name VARCHAR(100)) returns DECIMAL(10,2)
+    -> reads sql data
+    -> begin
+    ->     declare total_sales DECIMAL(10,2);
+    ->     select sum(amount) into total_sales from sales where sales.product_name = product_name;
+    ->     return ifnull(total_sales,0);
+    -> end //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> delimiter ;
+
+========================================================================================
+
+mysql> select gettotalsalesbyproduct('Laptop');
++----------------------------------+
+| gettotalsalesbyproduct('Laptop') |
++----------------------------------+
+|                          2500.00 |
++----------------------------------+
+1 row in set (0.00 sec)
+
+========================================================================================
+
+mysql> CREATE FUNCTION TotalSales(start_date DATE)
+    -> RETURNS DECIMAL(10,2)
+    -> READS SQL DATA  -- \U+2705 Added to comply with binary logging
+    -> BEGIN
+    ->     DECLARE total DECIMAL(10,2);
+    ->     DECLARE end_date DATE;
+    ->
+    ->     -- Set end_date to today's date
+    ->     SET end_date = CURRENT_DATE();
+    ->
+    ->     -- Calculate total sales in the given date range
+    ->     SELECT SUM(amount) INTO total
+    ->     FROM sales
+    ->     WHERE sale_date BETWEEN start_date AND end_date;
+    ->
+    ->     RETURN IFNULL(total, 0);  -- Return 0 if no sales found
+    -> END //
+Query OK, 0 rows affected (0.02 sec)
+
+mysql>
+mysql> DELIMITER ;
+mysql> SELECT TotalSales('2024-01-01') AS total_sales;
++-------------+
+| total_sales |
++-------------+
+|     4550.00 |
++-------------+
+1 row in set (0.01 sec)
+
+========================================================================================
+mysql> CREATE PROCEDURE GetSalesByDateRange(IN start_date DATE, IN end_date DATE)
+    -> BEGIN
+    ->     SELECT id, product_name, sale_date, amount
+    ->     FROM sales
+    ->     WHERE sale_date BETWEEN start_date AND end_date;
+    -> END //
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> CALL GetSalesByDateRange('2024-03-10', '2024-03-22');
++----+--------------+------------+---------+
+| id | product_name | sale_date  | amount  |
++----+--------------+------------+---------+
+|  1 | Laptop       | 2024-03-10 | 1200.00 |
+|  2 | Phone        | 2024-03-12 |  800.00 |
+|  3 | Tablet       | 2024-03-15 |  500.00 |
+|  4 | Laptop       | 2024-03-20 | 1300.00 |
+|  5 | Phone        | 2024-03-22 |  750.00 |
++----+--------------+------------+---------+
+5 rows in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
